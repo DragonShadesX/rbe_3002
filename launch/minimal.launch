@@ -1,0 +1,3 @@
+<launch>
+  <node name="a_star_server" pkg="rbe_3002" type="AStar.py" respawn="false" />
+</launch>

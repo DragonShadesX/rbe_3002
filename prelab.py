@@ -40,11 +40,11 @@ def OdomCallBack(data):
 	roll, pitch, yaw = euler_from_quaternion(q)
 
 	#set what is useful to us as global variables to be used everywhere
-	global x 
+	global x
 	x = px
-	global y 
+	global y
 	y = py
-	global theta 
+	global theta
 	theta = yaw
 
 

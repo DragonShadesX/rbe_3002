@@ -1,0 +1,23 @@
+map = read in from datastream
+
+map_cord = map in (x, y, wall?) format
+
+walls = a list of wall locations
+
+map_width = (take from map_metadata)
+map_height = (take from map_metadata)
+
+i = 0
+j = 0
+
+//  change width and height maybe?  see based on how map gets read in
+//  also may need to change to i=j=37 and count down for co-or frame changes
+for i < map_width
+	for j < map_height
+		if map( (i*37) + j) == 100
+			walls.append( (i, j) )
+			map_cord.append( (i, j, 1) )
+		else
+			map_cord.append( (i, j, 0) )
+
+return map_coord

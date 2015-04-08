@@ -1,0 +1,4 @@
+<launch>
+  <node name="a_star_server" pkg="rbe_3002" type="a_star_server.py"/>
+  <test test-name="a_star" pkg="rbe_3002" type="test_a_star.py" />
+</launch>

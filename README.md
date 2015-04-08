@@ -12,3 +12,6 @@ From the `catkin_wc` directory run `catkin_make`.
 Launching the AStar service is currently done through using `roslaunch rbe3002 minimal.launch`.
 
 I would recommend leaving the `minimal.launch` file as the basic launch for our package and adding additional launch files to test its integration with other packages.
+
+## Testing
+The test on the A Star Service can be run using `rostest rbe_3002 test-a-star.launch`

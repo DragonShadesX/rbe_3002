@@ -1,3 +1,5 @@
-int32[] map
+int32[] startPoint
+int32[] targetPoint
 ---
-int32[] path
+uint32[] pathx
+uint32[] pathy

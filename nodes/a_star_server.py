@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-#Code from: http://www.redblobgames.com/pathfinding/a-star/implementation.html
+
+from rbe_3002.srv import *
+import rospy
 
 import collections
 import sys
@@ -19,19 +21,6 @@ class PriorityQueue(object):
 
     def get(self):
         return heapq.heappop(self.elements)[1]
-
-# class Queue:
-#     def __init__(self):
-#         self.elements = collections.deque()
-#
-#     def empty(self):
-#         return len(self.elements) == 0
-#
-#     def put(self, x):
-#         self.elements.append(x)
-#
-#     def get(self):
-#         return self.elements.popleft()
 
 class SquareGrid(object):
     def __init__(self, width, height):
@@ -121,7 +110,9 @@ def draw_grid(graph, width=2, **style):
             print u"%%-%ds" % width % draw_tile(graph, (x, y), style, width),; sys.stdout.write(u"")
         print
 
-if __name__ == '__main__':
+
+def a_star(req):
+    rospy.loginfo("Request for a_star")
     diagram4 = GridWithWeights(10, 10)
     diagram4.walls = [(1, 7), (1, 8), (2, 7), (2, 8), (3, 7), (3, 8)]
     diagram4.weights = dict((loc, 5) for loc in [(3, 4), (3, 5), (4, 1), (4, 2),
@@ -131,11 +122,22 @@ if __name__ == '__main__':
                                            (5, 7), (5, 8), (6, 2), (6, 3),
                                            (6, 4), (6, 5), (6, 6), (6, 7),
                                            (7, 3), (7, 4), (7, 5)])
-    draw_grid(diagram4)
-    print "\nResult"
-    startPoint = (4, 4)
-    goalPoint = (7, 9)
-    came_from, cost_so_far = a_star_search(diagram4, startPoint, goalPoint)
-    draw_grid(diagram4, width=3, point_to=came_from, start=startPoint, goal=goalPoint)
-    path = reconstruct_path(came_from, startPoint, goalPoint)
+    print "Passed arguments\n"
+    print req
+    came_from, cost_so_far = a_star_search(diagram4, req.startPoint, req.targetPoint)
+    path = reconstruct_path(came_from, req.startPoint, req.targetPoint)
+    path = tuple(path)
+    pathx, pathy = zip(*path)
     print path
+    print pathx
+    print pathy
+    return AStarResponse(pathx, pathy)
+
+def a_star_server():
+    rospy.logdebug("Running A* Server")
+    rospy.init_node('a_star_server')
+    s = rospy.Service('a_star', AStar, a_star)
+    rospy.spin()
+
+if __name__ == '__main__':
+    a_star_server()

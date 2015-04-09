@@ -79,6 +79,8 @@ def a_star_search(graph, start, goal):
         for next in graph.neighbors(current):
             new_cost = cost_so_far[current] + graph.cost(current, next)
             if next not in cost_so_far or new_cost < cost_so_far[next]:
+                (x, y) = next
+                publishCell(x, y, 'o')
                 cost_so_far[next] = new_cost
                 priority = new_cost + heuristic(goal, next)
                 frontier.put(next, priority)
@@ -111,9 +113,97 @@ def draw_grid(graph, width=2, **style):
 ## END A STAR SOURCE IMPLEMENTATION
 
 
+## BEGIN CELL COLOR SETTING
+#imports  --------------------------------------------------------------------------------------------------------
+import rospy
+import roslib
+import math
+import tf
+
+from geometry_msgs.msg import Point
+from nav_msgs.msg import GridCells
+
+#Subscribers and Publishers and Callbacks  -----------------------------------------------------------------------
+
+#init subscribers and publishers
+
+def initSubPub():
+    global pubRedCell
+    pubRedCell = rospy.Publisher('grid_red', GridCells, queue_size=10)
+    global pubOrangeCell
+    pubOrangeCell = rospy.Publisher('grid_orange', GridCells, queue_size=10)
+    global pubYellowCell
+    pubYellowCell = rospy.Publisher('grid_yellow', GridCells, queue_size=10)
+    global pubGreenCell
+    pubGreenCell = rospy.Publisher('grid_green',GridCells, queue_size=10)
+    global pubBlueCell
+    pubBlueCell = rospy.Publisher('grid_blue', GridCells, queue_size=10)
+    global messages
+    messages ={'r':GridCells(), 'o':GridCells(), 'y':GridCells(), 'g':GridCells(), 'b':GridCells()}
+
+
+#Publish a cell to a color topic
+# int int char, chars = [ r, o, y, g, b]
+def publishCell(grid_x, grid_y, color):
+    global messages
+    global pubRedCell
+    global pubOrangeCell
+    global pubYellowCell
+    global pubGreenCell
+    global pubBlueCell
+    pub_msg = messages[color]
+    pub_msg.header.frame_id = "/map"
+    pub_msg.cell_width = .2
+    pub_msg.cell_height = .2
+    point = Point()
+    point.x = -(3-grid_y/5.)
+    point.y = -(3-grid_x/5.)
+    point.z = 0
+    pub_msg.cells.append(point)
+
+    if color == 'r':
+    	pubRedCell.publish(pub_msg)
+    if color == 'o':
+    	pubOrangeCell.publish(pub_msg)
+    if color == 'y':
+    	pubYellowCell.publish(pub_msg)
+    if color == 'g':
+    	pubGreenCell.publish(pub_msg)
+    if color == 'b':
+    	pubBlueCell.publish(pub_msg)
+
+def clearCells():
+    global messages
+    global pubRedCell
+    global pubOrangeCell
+    global pubYellowCell
+    global pubGreenCell
+    global pubBlueCell
+    for key in messages:
+        messages[key].cells = []
+    pub_msg = GridCells()
+    pub_msg.header.frame_id = "/map"
+    pub_msg.cell_width = .2
+    pub_msg.cell_height = .2
+    pub_msg.cells = []
+
+    pubRedCell.publish(pub_msg)
+    pubOrangeCell.publish(pub_msg)
+    pubYellowCell.publish(pub_msg)
+    pubGreenCell.publish(pub_msg)
+    pubBlueCell.publish(pub_msg)
+
+
+## END COLOR HANDLING
+
+## BEGIN SERVER HANDLING
+
 from rbe_3002.srv import *
 import rospy
 from nav_msgs.msg import OccupancyGrid
+
+def distance(p0, p1):
+    return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
 
 def map_callback(ret):
     #print ret
@@ -133,29 +223,56 @@ def map_callback(ret):
     gridDataGlobal = gridData
 
 def a_star(req):
+    global loaded
     rospy.loginfo("Request for a_star")
     mapSub = rospy.Subscriber("map", OccupancyGrid, map_callback)
-    while not rospy.is_shutdown():
+    while not loaded and not rospy.is_shutdown():
         rospy.sleep(.01)
         if not 'gridDataGlobal' in globals():
             rospy.sleep(.1)
             break
 
+    loaded = True
     global gridDataGlobal
 
     print req
     came_from, cost_so_far = a_star_search(gridDataGlobal, req.startPoint, req.targetPoint)
-    draw_grid(gridDataGlobal, width=3, point_to=came_from, start=req.startPoint, goal= req.targetPoint)
+    #draw_grid(gridDataGlobal, width=3, point_to=came_from, start=req.startPoint, goal= req.targetPoint)
     path = reconstruct_path(came_from, req.startPoint, req.targetPoint)
     path = tuple(path)
     pathx, pathy = zip(*path)
     print 'Path:'
     print path
+    waypoints = []
+    lastx = [None, None]
+    lasty = [None, None]
+    for (x, y) in path:
+        if lastx[1] != None and lasty[1] != None:
+            # Calculate the distance between this point and two behind
+            dis =  distance([x,y],[lastx[1], lasty[1]])
+            #If the distance is 2 then we are on a straight section however if it is less then the last point is a waypoint
+            if dis < 1.87:
+                waypoints.append((x,y))
+                publishCell(lastx[0],lasty[0],'b')
+        lastx[1] = lastx[0]
+        lasty[1] = lasty[0]
+        lastx[0] = x
+        lasty[0] = y
+
+    rospy.sleep(3)
+    clearCells()
+    rospy.sleep(3)
+    for(x,y) in path:
+        publishCell(x,y,'r')
+
     #print pathx
     #print pathy
     return AStarResponse(pathx, pathy)
 
 def a_star_server():
+    global loaded
+    loaded = False
+    initSubPub()
     #global mapSub
     rospy.logdebug("Running A* Server")
     #mapSub = rospy.Subscriber("map", OccupancyGrid, map_callback)

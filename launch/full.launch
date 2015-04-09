@@ -1,0 +1,6 @@
+<launch>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rbe_3002)/lab_3_rviz_config.rviz" />
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find rbe_3002)/map/lab3map.yaml" output="screen"/>
+  <node name="a_star_server" pkg="rbe_3002" type="a_star_server.py" respawn="false" output="screen"/>
+  <node name="lab3" pkg="rbe_3002" type="lab3.py" args="12" />
+</launch>

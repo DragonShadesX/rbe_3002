@@ -1,4 +1,4 @@
-image: ./simple_map.pgm
+image: lab3map.pgm
 resolution: 0.20000
 origin: [-3.100000, -3.100000, 0.000000]
 negate: 0

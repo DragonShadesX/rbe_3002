@@ -1,4 +1,6 @@
 <launch>
+  <!-- <arg name="map_file" default="$(find rbe_3002)/map/lab3map.yaml" /> -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find rbe_3002)/map/lab3map.yaml" />
   <node name="a_star_server" pkg="rbe_3002" type="a_star_server.py"/>
   <test test-name="a_star" pkg="rbe_3002" type="test_a_star.py" />
 </launch>

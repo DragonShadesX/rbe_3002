@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-from rbe_3002.srv import *
-import rospy
-
+#BEGIN A STAR IMPLMEMENTATION
 import collections
 import sys
 from itertools import ifilter
@@ -110,31 +108,61 @@ def draw_grid(graph, width=2, **style):
             print u"%%-%ds" % width % draw_tile(graph, (x, y), style, width),; sys.stdout.write(u"")
         print
 
+## END A STAR SOURCE IMPLEMENTATION
+
+
+from rbe_3002.srv import *
+import rospy
+from nav_msgs.msg import OccupancyGrid
+
+def map_callback(ret):
+    global gridData
+    #print ret
+    width = ret.info.width
+    height = ret.info.height
+    gridData = GridWithWeights(width, height)
+    gridData.walls = []
+    #gridData.weights #If we ever choose to use weights here we can
+    i = 0 # Element in the list
+    for x in xrange(width):
+        for y in xrange(height):
+            if ret.data[i] == 100:
+                gridData.walls.append((x, y))
+            i += 1
+    #print gridData.walls
+
+
+
+def get_map():
+    rospy.Subscriber("/map", OccupancyGrid, map_callback)
+
+
+
 
 def a_star(req):
     rospy.loginfo("Request for a_star")
-    diagram4 = GridWithWeights(10, 10)
-    diagram4.walls = [(1, 7), (1, 8), (2, 7), (2, 8), (3, 7), (3, 8)]
-    diagram4.weights = dict((loc, 5) for loc in [(3, 4), (3, 5), (4, 1), (4, 2),
-                                           (4, 3), (4, 4), (4, 5), (4, 6),
-                                           (4, 7), (4, 8), (5, 1), (5, 2),
-                                           (5, 3), (5, 4), (5, 5), (5, 6),
-                                           (5, 7), (5, 8), (6, 2), (6, 3),
-                                           (6, 4), (6, 5), (6, 6), (6, 7),
-                                           (7, 3), (7, 4), (7, 5)])
-    print "Passed arguments\n"
+    while not rospy.is_shutdown():
+        if not 'gridData' in globals():
+            rospy.sleep(.01)
+            break
+
+    global gridData
+
     print req
-    came_from, cost_so_far = a_star_search(diagram4, req.startPoint, req.targetPoint)
+    came_from, cost_so_far = a_star_search(gridData, req.startPoint, req.targetPoint)
+    draw_grid(gridData, width=3, point_to=came_from, start=req.startPoint, goal= req.targetPoint)
     path = reconstruct_path(came_from, req.startPoint, req.targetPoint)
     path = tuple(path)
     pathx, pathy = zip(*path)
+    print 'Path:'
     print path
-    print pathx
-    print pathy
+    #print pathx
+    #print pathy
     return AStarResponse(pathx, pathy)
 
 def a_star_server():
     rospy.logdebug("Running A* Server")
+    get_map()
     rospy.init_node('a_star_server')
     s = rospy.Service('a_star', AStar, a_star)
     rospy.spin()

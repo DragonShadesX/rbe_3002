@@ -116,7 +116,6 @@ import rospy
 from nav_msgs.msg import OccupancyGrid
 
 def map_callback(ret):
-    global gridData
     #print ret
     width = ret.info.width
     height = ret.info.height
@@ -130,27 +129,23 @@ def map_callback(ret):
                 gridData.walls.append((x, y))
             i += 1
     #print gridData.walls
-
-
-
-def get_map():
-    rospy.Subscriber("/map", OccupancyGrid, map_callback)
-
-
-
+    global gridDataGlobal
+    gridDataGlobal = gridData
 
 def a_star(req):
     rospy.loginfo("Request for a_star")
+    mapSub = rospy.Subscriber("map", OccupancyGrid, map_callback)
     while not rospy.is_shutdown():
-        if not 'gridData' in globals():
-            rospy.sleep(.01)
+        rospy.sleep(.01)
+        if not 'gridDataGlobal' in globals():
+            rospy.sleep(.1)
             break
 
-    global gridData
+    global gridDataGlobal
 
     print req
-    came_from, cost_so_far = a_star_search(gridData, req.startPoint, req.targetPoint)
-    draw_grid(gridData, width=3, point_to=came_from, start=req.startPoint, goal= req.targetPoint)
+    came_from, cost_so_far = a_star_search(gridDataGlobal, req.startPoint, req.targetPoint)
+    draw_grid(gridDataGlobal, width=3, point_to=came_from, start=req.startPoint, goal= req.targetPoint)
     path = reconstruct_path(came_from, req.startPoint, req.targetPoint)
     path = tuple(path)
     pathx, pathy = zip(*path)
@@ -161,8 +156,9 @@ def a_star(req):
     return AStarResponse(pathx, pathy)
 
 def a_star_server():
+    #global mapSub
     rospy.logdebug("Running A* Server")
-    get_map()
+    #mapSub = rospy.Subscriber("map", OccupancyGrid, map_callback)
     rospy.init_node('a_star_server')
     s = rospy.Service('a_star', AStar, a_star)
     rospy.spin()

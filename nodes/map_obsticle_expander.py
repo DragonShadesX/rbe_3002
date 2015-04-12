@@ -25,7 +25,7 @@ def expand_arround_cordinate(data, x, y, width, height, expandBy):
 
 def expand_cordinate(data, x, y, width, height, expandBy):
     #print "Expanding %d %d ExpandBy: %d" % (x, y, expandBy)
-    if  (x >= 0 and x < height) and (y >= 0 and y < width) and data[x][y] <= 0:
+    if  (x >= 0 and x < height) and (y >= 0 and y < width) and data[x][y] != 100:
         expand_arround_cordinate(data, x, y, width, height, expandBy)
 
 

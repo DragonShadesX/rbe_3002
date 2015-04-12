@@ -11,6 +11,7 @@ Panels:
         - /Map1/Orientation1
         - /Map Compressed1
         - /Map Compressed1/Status1
+        - /Map2
       Splitter Ratio: 0.550336
     Tree Height: 501
   - Class: rviz/Selection
@@ -67,7 +68,15 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: Map Compressed
-      Topic: /map_compressed
+      Topic: /map_scaled
+      Value: true
+    - Alpha: 0.7
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic: /map_expanded
       Value: true
   Enabled: true
   Global Options:
@@ -92,7 +101,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -0.0100013
+      Angle: 0.0649987
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
@@ -101,11 +110,11 @@ Visualization Manager:
         Value: false
       Name: Current View
       Near Clip Distance: 0.01
-      Scale: 10.2155
+      Scale: 13.4734
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 12.2007
-      Y: 1.38392
+      X: 20.6315
+      Y: 2.12535
     Saved: ~
 Window Geometry:
   Displays:

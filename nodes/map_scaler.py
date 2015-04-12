@@ -5,12 +5,8 @@ import math
 import sys
 from rbe_3002.srv import *
 from nav_msgs.msg import OccupancyGrid
+from src.occupancy_grid_manipulator import *
 
-
-
-#Takes the rediculously long list and breaks it up into chuncks of width
-def chunk(data, width, height):
-    return [data[x:x+width] for x in xrange(0, len(data), width)]
 
 #Scales the map data from map topic
 def compress_map(mapData, division):
@@ -20,6 +16,7 @@ def compress_map(mapData, division):
     height = mapData.info.height
     resolution = mapData.info.resolution
 
+    #newGrid.header = mapData.header
     newGrid.info.origin = mapData.info.origin
 
 
@@ -29,11 +26,7 @@ def compress_map(mapData, division):
 
     dataChunked = chunk(mapData.data, width, height)
 
-    # [x][][][][][][][x][]
-    # [x][][x]
-
-    i = 0 # element in the list
-    for x in xrange(+int(height/(division))): #All of the height elements
+    for x in xrange(int(height/(division))): #All of the height elements
         for y in xrange(int(width/(division))): #All of the width elements
             wallFound = False
             nullSpaceFound = True
@@ -62,7 +55,7 @@ def compress_map(mapData, division):
 
 def map_callback(ret):
     print ret.info
-    newGrid = compress_map(ret, 10)
+    newGrid = compress_map(ret, 2)
     global mapPublisher
     mapPublisher.publish(newGrid)
     print newGrid
@@ -73,6 +66,6 @@ def map_callback(ret):
 if __name__ == '__main__':
     rospy.init_node('map_scaler')
     global mapPublisher
-    mapPublisher = rospy.Publisher('map_compressed', OccupancyGrid, queue_size=10)
+    mapPublisher = rospy.Publisher('map_scaled', OccupancyGrid, queue_size=10)
     mapSub = rospy.Subscriber("map", OccupancyGrid, map_callback)
     rospy.spin()

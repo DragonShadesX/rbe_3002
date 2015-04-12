@@ -33,8 +33,8 @@ def compress_map(mapData, division):
     # [x][][x]
 
     i = 0 # element in the list
-    for x in xrange(+int(height/(division))): #All of the width elements
-        for y in xrange(int(width/(division))): #All of the height elements
+    for x in xrange(+int(height/(division))): #All of the height elements
+        for y in xrange(int(width/(division))): #All of the width elements
             wallFound = False
             nullSpaceFound = True
             for divx in xrange(division):
@@ -62,7 +62,7 @@ def compress_map(mapData, division):
 
 def map_callback(ret):
     print ret.info
-    newGrid = compress_map(ret, 5)
+    newGrid = compress_map(ret, 10)
     global mapPublisher
     mapPublisher.publish(newGrid)
     print newGrid

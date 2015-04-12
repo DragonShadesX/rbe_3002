@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+from __future__ import print_function
+
+PKG = 'rbe_3002'
+NAME = 'a_star_test'
+
+import sys
+import unittest
+
+import rospy
+import rostest
+#from rbe_3002.srv import *
+
+class TestAStar(unittest.TestCase):
+    def test_correct_response(self):
+        # When we setup access to the aStar service
+        rospy.loginfo("Starting Unit Test")
+        rospy.wait_for_service('a_star')
+        s = rospy.ServiceProxy('a_star', AStar)
+        startPoint = (4, 4)
+        goalPoint = (7, 9)
+
+        # When we make a request to this service
+        req = AStarRequest(startPoint, goalPoint)
+        pathResponse = s(req)
+        path = zip(pathResponse.pathx, pathResponse.pathy)
+
+        #Then the first and last values returned by the path should be the start and goal repspectively
+        self.assertEquals(goalPoint, path[0], "The first elemet of the returned tuple was not the goal point")
+        self.assertEquals(startPoint, path[-1], "The last elemet of the returned tuple was not the start point")
+
+
+
+if __name__ == '__main__':
+    rostest.rosrun(PKG, NAME, TestAStar, sys.argv)

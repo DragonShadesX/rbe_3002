@@ -10,7 +10,13 @@ from nav_msgs.msg import GridCells
 
 #init subscribers and publishers
 
-def initSubPub():
+
+
+def initSubPub(mapInfo, topic):
+    global MAP_TOPIC
+    MAP_TOPIC = topic
+    global MAP_INFO
+    MAP_INFO = mapInfo
     global pubRedCell
     pubRedCell = rospy.Publisher('grid_red', GridCells, queue_size=10)
     global pubOrangeCell
@@ -23,24 +29,23 @@ def initSubPub():
     pubBlueCell = rospy.Publisher('grid_blue', GridCells, queue_size=10)
     global messages
     messages ={'r':GridCells(), 'o':GridCells(), 'y':GridCells(), 'g':GridCells(), 'b':GridCells()}
+    for key in messages:
+        messages[key].cell_width = mapInfo.resolution
+        messages[key].cell_height = mapInfo.resolution
+        messages[key].header.frame_id = 'map'
 
 
 #Publish a cell to a color topic
 # int int char, chars = [ r, o, y, g, b]
 def addCell(grid_x, grid_y, color):
+    global MAP_TOPIC
+    global MAP_INFO
     global messages
-    global pubRedCell
-    global pubOrangeCell
-    global pubYellowCell
-    global pubGreenCell
-    global pubBlueCell
     pub_msg = messages[color]
-    pub_msg.header.frame_id = "/map"
-    pub_msg.cell_width = .2
-    pub_msg.cell_height = .2
     point = Point()
-    point.x = -(3-grid_y/5.)
-    point.y = -(3-grid_x/5.)
+    #OccupancyGrid().info.origin.position.x
+    point.y = (float(grid_x + .5) * MAP_INFO.resolution + float(MAP_INFO.origin.position.x))
+    point.x = (float(grid_y + .5) * MAP_INFO.resolution + float(MAP_INFO.origin.position.y))
     point.z = 0
     pub_msg.cells.append(point)
 
@@ -52,6 +57,7 @@ def publish(color):
     global pubGreenCell
     global pubBlueCell
     pub_msg = messages[color]
+    print pub_msg
     if color == 'r':
     	pubRedCell.publish(pub_msg)
     if color == 'o':
@@ -64,6 +70,7 @@ def publish(color):
     	pubBlueCell.publish(pub_msg)
 
 def clearCells():
+    global MAP_TOPIC
     global messages
     global pubRedCell
     global pubOrangeCell
@@ -73,7 +80,7 @@ def clearCells():
     for key in messages:
         messages[key].cells = []
     pub_msg = GridCells()
-    pub_msg.header.frame_id = "/map"
+    pub_msg.header.frame_id = 'map'
     pub_msg.cell_width = .2
     pub_msg.cell_height = .2
     pub_msg.cells = []

@@ -55,7 +55,7 @@ def compress_map(mapData, division):
 
 def map_callback(ret):
     print ret.info
-    newGrid = compress_map(ret, 2)
+    newGrid = compress_map(ret, 6)
     global mapPublisher
     mapPublisher.publish(newGrid)
     print newGrid

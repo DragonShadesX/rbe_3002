@@ -10,8 +10,8 @@ def main(delay):
     rospy.loginfo("Starting Unit Test")
     rospy.wait_for_service('a_star')
     s = rospy.ServiceProxy('a_star', AStar)
-    startPoint = (150, 100)
-    goalPoint = (190, 140)
+    startPoint = (-3, 7.5)
+    goalPoint = (2, 8)
 
     # When we make a request to this service
     req = AStarRequest(startPoint, goalPoint)

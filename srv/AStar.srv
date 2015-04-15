@@ -1,5 +1,5 @@
-int32[] startPoint
-int32[] targetPoint
+float32[] startPoint
+float32[] targetPoint
 ---
-uint32[] pathx
-uint32[] pathy
+int32[] pathx
+int32[] pathy

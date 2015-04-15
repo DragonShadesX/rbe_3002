@@ -22,8 +22,9 @@ def distance(p0, p1):
     return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
 
 def map_callback(ret):
-    #print ret
+    global map_info
     initSubPub(ret.info, MAP_TOPIC)
+    map_info = ret.info
     width = ret.info.width
     height = ret.info.height
 
@@ -34,11 +35,11 @@ def map_callback(ret):
     for x in xrange(height):
         for y in xrange(width):
             if ret.data[i] == 100:
-                print "100 Found"
-                addCell(x, y, 'o')
+                #print "100 Found"
+                #addCell(x, y, 'o')
                 gridData.walls.append((x, y))
             i +=1
-    publish('o')
+    #publish('o')
 
     #print gridData.wallsorientation
     global gridDataGlobal
@@ -49,17 +50,37 @@ def map_callback(ret):
         initialized = True
         s = rospy.Service('a_star', AStar, a_star)
 
+def convert_to_cell(point):
+    global map_info
+    #x = (float(grid_x + .5) * map_info.resolution + float(map_info.origin.position.x))
+    y_cord = (point[0] - float(map_info.origin.position.x))/map_info.resolution
+    #y = (float(grid_y + .5) * map_info.resolution + float(map_info.origin.position.y))
+    x_cord = (point[1] - float(map_info.origin.position.y))/map_info.resolution
+    cell = (int(x_cord), int(y_cord))
+    print cell
+    return cell
+
+
 def a_star(req):
-    return None
-    global loaded
     rospy.loginfo("Request for a_star")
+    clearCells()
+    rospy.sleep(1)
 
     global gridDataGlobal
 
     print req
-    came_from, cost_so_far = a_star_search(gridDataGlobal, req.startPoint, req.targetPoint)
+    startCell = convert_to_cell(req.startPoint)
+    targetCell = convert_to_cell(req.targetPoint)
+    addCell(startCell[0], startCell[1], 'b')
+    publish('b')
+    addCell(targetCell[0], targetCell[1], 'r')
+    publish('r')
+
+    #TODO: Check for invalid start/end positions. In wall, ect
+
+    came_from, cost_so_far = a_star_search(gridDataGlobal, startCell, targetCell)
     #draw_grid(gridDataGlobal, width=3, point_to=came_from, start=req.startPoint, goal= req.targetPoint)
-    path = reconstruct_path(came_from, req.startPoint, req.targetPoint)
+    path = reconstruct_path(came_from, startCell, targetCell)
     path = tuple(path)
     pathx, pathy = zip(*path)
     print 'Path:'
@@ -83,7 +104,7 @@ def a_star(req):
     #
     # rospy.sleep(3)
     # clearCells()
-    rospy.sleep(3)
+    #rospy.sleep(3)
     # for(x,y) in path:
     #     addCell(x,y,'r')
     # publish('r')

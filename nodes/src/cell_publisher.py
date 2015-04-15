@@ -38,14 +38,13 @@ def initSubPub(mapInfo, topic):
 #Publish a cell to a color topic
 # int int char, chars = [ r, o, y, g, b]
 def addCell(grid_x, grid_y, color):
-    global MAP_TOPIC
     global MAP_INFO
     global messages
     pub_msg = messages[color]
     point = Point()
     #OccupancyGrid().info.origin.position.x
-    point.y = (float(grid_x + .5) * MAP_INFO.resolution + float(MAP_INFO.origin.position.x))
-    point.x = (float(grid_y + .5) * MAP_INFO.resolution + float(MAP_INFO.origin.position.y))
+    point.x = (float(grid_x + .5) * MAP_INFO.resolution + float(MAP_INFO.origin.position.x))
+    point.y = (float(grid_y + .5) * MAP_INFO.resolution + float(MAP_INFO.origin.position.y))
     point.z = 0
     pub_msg.cells.append(point)
 

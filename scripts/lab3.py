@@ -11,7 +11,7 @@ def main(delay):
     rospy.wait_for_service('a_star')
     s = rospy.ServiceProxy('a_star', AStar)
     startPoint = (-3, 7.5)
-    goalPoint = (2, 8)
+    goalPoint = (2, 10.5)
 
     # When we make a request to this service
     req = AStarRequest(startPoint, goalPoint)

@@ -33,8 +33,8 @@ def map_callback(ret):
     gridData.walls = []
     #gridData.weights #If weorigin to use weights here we can
     i = 0 # Element in the list
-    for x in xrange(height):
-        for y in xrange(width):
+    for y in xrange(height):
+        for x in xrange(width):
             if ret.data[i] == 100:
                 #print "100 Found"
                 #addCell(x, y, 'o')
@@ -117,5 +117,5 @@ def a_star_server():
     rospy.spin()
 
 if __name__ == '__main__':
-    tset = GridWithWeights(1, 1)
+    #tset = GridWithWeights(1, 1)
     a_star_server()

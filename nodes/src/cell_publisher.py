@@ -5,6 +5,7 @@ import roslib
 import math
 from geometry_msgs.msg import Point
 from nav_msgs.msg import GridCells
+from reference_transforms import *
 
 #Subscribers and Publishers and Callbacks  -----------------------------------------------------------------------
 
@@ -12,9 +13,7 @@ from nav_msgs.msg import GridCells
 
 
 
-def initSubPub(mapInfo, topic):
-    global MAP_TOPIC
-    MAP_TOPIC = topic
+def initSubPub(mapInfo):
     global MAP_INFO
     MAP_INFO = mapInfo
     global pubRedCell
@@ -42,9 +41,9 @@ def addCell(grid_x, grid_y, color):
     global messages
     pub_msg = messages[color]
     point = Point()
-    #OccupancyGrid().info.origin.position.x
-    point.x = (float(grid_x + .5) * MAP_INFO.resolution + float(MAP_INFO.origin.position.x))
-    point.y = (float(grid_y + .5) * MAP_INFO.resolution + float(MAP_INFO.origin.position.y))
+    cell = transform_grid_cells_to_map_meters((grid_x, grid_y), MAP_INFO)
+    point.x = cell[0]
+    point.y = cell[1]
     point.z = 0
     pub_msg.cells.append(point)
 
@@ -56,7 +55,7 @@ def publish(color):
     global pubGreenCell
     global pubBlueCell
     pub_msg = messages[color]
-    print pub_msg
+    #print pub_msg
     if color == 'r':
     	pubRedCell.publish(pub_msg)
     if color == 'o':
@@ -69,7 +68,6 @@ def publish(color):
     	pubBlueCell.publish(pub_msg)
 
 def clearCells():
-    global MAP_TOPIC
     global messages
     global pubRedCell
     global pubOrangeCell

@@ -11,8 +11,8 @@ def main(delay):
     rospy.wait_for_service('a_star')
     s = rospy.ServiceProxy('a_star', AStar)
     # Cordinates are relative to the origin of the map in meters
-    startPoint = (-3, 7.5)
-    goalPoint = (2, 10.5)
+    startPoint = (-3, 7)
+    goalPoint = (2, 7)
 
     # When we make a request to this service
     req = AStarRequest(startPoint, goalPoint)

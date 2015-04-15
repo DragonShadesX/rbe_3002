@@ -1,11 +1,14 @@
 # RBE 3002 Project Repo
 ## Running this project
-### Partial Launch
+## Current Configuration
+Launch list (each in different terminal) `roscore`, `rosrun rviz rviz -d {config file}`, `rosrun rbe_3002 map_scaler.py`, `rosrun rbe_3002 map_obsticle_expander.py`, `rosrun rbe_3002 a_star_server.py`, `rosrun map_server map_server {map file}`, `rosrun rbe_3002 lab4.py`
+
+### Partial Launch (Not tested on current version)
 Launching the AStar service is currently done through using `roslaunch rbe_3002 minimal.launch`.
 
 I would recommend leaving the `minimal.launch` file as the basic launch for our package and adding additional launch files to test its integration with other packages.
 
-### Full Launch
+### Full Launch (Not tested on current version)
 In order to run the full lab run `roslaunch rbe_3002 full.launch` This will launch `rviz` as well as our example script. The example script is on a 15 second delay to allow `rviz` to load fully before messages are sent.
 
 ## Clone Location

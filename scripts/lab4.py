@@ -10,11 +10,14 @@ def main(delay):
     rospy.loginfo("Starting Unit Test")
     rospy.wait_for_service('a_star')
     s = rospy.ServiceProxy('a_star', AStar)
+    # Cordinates are relative to the origin of the map in meters
     startPoint = (-3, 7.5)
     goalPoint = (2, 10.5)
 
     # When we make a request to this service
     req = AStarRequest(startPoint, goalPoint)
+    print "WARNING: THESE VALUES ARE RELATIVE TO THE GRID, NOT THE ROBOT, I STILL NEED TO APPLY A REFERENC FRAME TRANSFORM."
+    print "I'll do this inside of the a_star_server so that it returns the value in the correct reference frame"
     pathResponse = s(req)
     path = zip(pathResponse.pathx, pathResponse.pathy)
     print path

@@ -80,6 +80,7 @@ def clearCells():
     for key in messages:
         messages[key].cells = []
     pub_msg = GridCells()
+    #These can be arbatray values
     pub_msg.header.frame_id = 'map'
     pub_msg.cell_width = .2
     pub_msg.cell_height = .2

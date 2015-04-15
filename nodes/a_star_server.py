@@ -8,6 +8,7 @@ import tf
 
 from src.a_star_logic import *
 from src.cell_publisher import *
+from src.reference_transforms import *
 
 ## BEGIN SERVER HANDLING
 
@@ -50,16 +51,6 @@ def map_callback(ret):
         initialized = True
         s = rospy.Service('a_star', AStar, a_star)
 
-def convert_to_cell(point):
-    global map_info
-    #x = (float(grid_x + .5) * map_info.resolution + float(map_info.origin.position.x))
-    y_cord = (point[0] - float(map_info.origin.position.x))/map_info.resolution
-    #y = (float(grid_y + .5) * map_info.resolution + float(map_info.origin.position.y))
-    x_cord = (point[1] - float(map_info.origin.position.y))/map_info.resolution
-    cell = (int(x_cord), int(y_cord))
-    print cell
-    return cell
-
 
 def a_star(req):
     rospy.loginfo("Request for a_star")
@@ -67,10 +58,11 @@ def a_star(req):
     rospy.sleep(1)
 
     global gridDataGlobal
+    global map_info
 
     print req
-    startCell = convert_to_cell(req.startPoint)
-    targetCell = convert_to_cell(req.targetPoint)
+    startCell = transform_map_meters_to_grid_cells(req.startPoint, map_info)
+    targetCell = transform_map_meters_to_grid_cells(req.targetPoint, map_info)
     addCell(startCell[0], startCell[1], 'b')
     publish('b')
     addCell(targetCell[0], targetCell[1], 'r')

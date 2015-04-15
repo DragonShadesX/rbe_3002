@@ -55,7 +55,11 @@ def compress_map(mapData, division):
 
 def map_callback(ret):
     print ret.info
-    newGrid = compress_map(ret, 6)
+
+    #Scales the map relative to the width of the robot
+    scaleBy = (.23/2)/ret.info.resolution
+    scaleBy = int(math.ceil(scaleBy))
+    newGrid = compress_map(ret, scaleBy)
     global mapPublisher
     mapPublisher.publish(newGrid)
     print newGrid

@@ -10,14 +10,14 @@ def main(delay):
     rospy.sleep(delay)
     rospy.loginfo("Starting Unit Test")
     rospy.wait_for_service('a_star')
-    s = rospy.ServiceProxy('a_star', AStar)
+    a_star_service = rospy.ServiceProxy('a_star', AStar)
     # Cordinates are relative to the origin of the map in meters
     startPoint = (-3, 7)
     goalPoint = (2, 7)
 
     # When we make a request to this service
     req = AStarRequest(startPoint, goalPoint)
-    pathResponse = s(req)
+    pathResponse = a_star_service(req)
     #Round all of the values to something reasonable
     pathx = [ round(elem, 3) for elem in pathResponse.pathx ]
     pathy = [ round(elem, 3) for elem in pathResponse.pathy ]

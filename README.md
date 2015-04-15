@@ -1,7 +1,14 @@
 # RBE 3002 Project Repo
 ## Running this project
-## Current Configuration
+## Automatic Code Launching (Local Map)
+This will launch everything so that you can test that the whole system works: `roslaunch rbe_3002 local_map_test.launch`
+
+## Launching Nav on the Robot
+On Robot: `roslaunch turtlebot_bringup minimal.launch` and `roslaunch turtlebot_navigation gmapping_demo.launch`. On your local computer: `roslaunch rbe_3002 robot_map_test.launch` Then run `rosrun rbe_3002 lab4.py` to path plan using the map the robot has generated.
+
+## Manual Launch Configuration (Local Map)
 Launch list (each in different terminal) `roscore`, `rosrun rviz rviz -d {config file}`, `rosrun rbe_3002 map_scaler.py`, `rosrun rbe_3002 map_obsticle_expander.py`, `rosrun rbe_3002 a_star_server.py`, `rosrun map_server map_server {map file}`, `rosrun rbe_3002 lab4.py`
+Every time you want to change a_star_server code you only need to re-run the a_star server and the map_server (in that order). The map transformer nodes will only run if the map_server rebroadcasts a message.
 
 ### Partial Launch (Not tested on current version)
 Launching the AStar service is currently done through using `roslaunch rbe_3002 minimal.launch`.

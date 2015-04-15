@@ -73,7 +73,7 @@ def a_star(req):
     came_from, cost_so_far = a_star_search(gridDataGlobal, startCell, targetCell)
     #draw_grid(gridDataGlobal, width=3, point_to=came_from, start=req.startPoint, goal= req.targetPoint)
     path = reconstruct_path(came_from, startCell, targetCell)
-    path = tuple(path)
+    path = tuple(reversed(path))
     newPath = []
     for cell in path:
         newPath.append(transform_grid_cells_to_map_meters(cell, map_info))

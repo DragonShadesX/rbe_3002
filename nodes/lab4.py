@@ -4,6 +4,7 @@ import roslib
 import math
 import sys
 from rbe_3002.srv import *
+from src.path_manipulation import *
 
 def main(delay):
     rospy.sleep(delay)
@@ -16,11 +17,17 @@ def main(delay):
 
     # When we make a request to this service
     req = AStarRequest(startPoint, goalPoint)
-    print "WARNING: THESE VALUES ARE RELATIVE TO THE GRID, NOT THE ROBOT, I STILL NEED TO APPLY A REFERENC FRAME TRANSFORM."
-    print "I'll do this inside of the a_star_server so that it returns the value in the correct reference frame"
     pathResponse = s(req)
-    path = zip(pathResponse.pathx, pathResponse.pathy)
+    #Round all of the values to something reasonable
+    pathx = [ round(elem, 3) for elem in pathResponse.pathx ]
+    pathy = [ round(elem, 3) for elem in pathResponse.pathy ]
+    path = zip(pathx, pathy)
+    print "Path"
     print path
+
+    waypoints = path_to_waypoints(path)
+    print "Waypoints"
+    print waypoints
 
     #Then the first and last values returned by the path should be the start and goal repspectively
 

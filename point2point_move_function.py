@@ -23,3 +23,8 @@ def point2point(goalX, goalY):
     rotate(-atan(moveY / moveX))
     driveStraight(driveSpeed, (moveX**2 + moveY**2)**.5)
     return
+
+
+
+for i in waypoints:
+    point2point(i[0], i[1])

@@ -5,15 +5,21 @@ import math
 import sys
 from rbe_3002.srv import *
 from src.path_manipulation import *
+from src.point2point_move_function import *
+from src.movement import *
+from geometry_msgs.msg import PointStamped
 
-def main(delay):
-    rospy.sleep(delay)
-    rospy.loginfo("Starting Unit Test")
-    rospy.wait_for_service('a_star')
-    a_star_service = rospy.ServiceProxy('a_star', AStar)
+
+def PoseCallBack(ret):
+    global goal
+    goal = (ret.point.x, ret.point.y)
+
+
+def getAStarWaypoints(a_star_service):
     # Cordinates are relative to the origin of the map in meters
-    startPoint = (-3, 7)
-    goalPoint = (2, 7)
+    (trans, rot) = getLocation()
+    startPoint = (trans[0], trans[1])
+    goalPoint = goal
 
     # When we make a request to this service
     req = AStarRequest(startPoint, goalPoint)
@@ -28,6 +34,29 @@ def main(delay):
     waypoints = path_to_waypoints(path)
     print "Waypoints"
     print waypoints
+    return waypoints
+
+def main(delay):
+    #move_base_symple
+    rospy.init_node('lab4')
+    initMovement()
+    init_point2pont()
+    rospy.sleep(delay)
+    rospy.wait_for_service('a_star')
+    a_star_service = rospy.ServiceProxy('a_star', AStar)
+    print "Waiting for click point"
+    click_sub = rospy.Subscriber("clicked_point", PointStamped, PoseCallBack)
+    rospy.wait_for_message("clicked_point", PointStamped)
+    #rotate(math.pi)
+    #rotate(math.pi)
+
+    waypoints = getAStarWaypoints(a_star_service)
+
+
+    while len(waypoints) != 0:
+        point2point(waypoints[1][0], waypoints[1][1])
+        waypoints = getAStarWaypoints(a_star_service)
+
 
     #Then the first and last values returned by the path should be the start and goal repspectively
 

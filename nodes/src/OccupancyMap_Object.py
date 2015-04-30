@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 ''' Defines an object for manipulating a ocupency grid map'''
-class OccupancyMap:
+class OccupancyMap(object):
     ''' Defines a collection of frontier cells that form one frontier '''
     class Frontier_Collection(object):
 

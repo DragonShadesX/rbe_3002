@@ -17,7 +17,7 @@ MAP_TOPIC = "map_expanded"
 FRONTIER_PUB_TOPIC = 'grid_frontier'
 
 def map_callback(ret):
-    print "Map Callback"
+    rospy.loginfo("Map Callback")
     #print ret
     map_data = OccupancyMap(ret)
     centroids = map_data.findFrontiers()
@@ -40,7 +40,7 @@ def map_callback(ret):
 
     # Publish this data
     global frontierPub
-    print "Publishing frontier"
+    rospy.loginfo("Publishing frontier")
     frontierPub.publish(gridCells)
 
 

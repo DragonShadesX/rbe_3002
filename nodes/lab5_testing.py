@@ -62,7 +62,7 @@ def getHighestStatus():
 
 
 def driveTo(x,y, theta):
-    print "Drive to (%f, %f, %f)" % (x, y, theta)
+    rospy.loginfo("Drive to (%f, %f, %f)", x, y, theta)
     newPose = generate_pose(x, y, 0)
     #print newPose
     actionGoal = MoveBaseActionGoal()
@@ -108,7 +108,7 @@ def distance(p0, p1):
     return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
 
 def frontier_callback(ret):
-    print "frontier_callback"
+    rospy.loginfo("frontier_callback")
     print ret
     #ret = GridCells() #Used for autocompletion
     (trans, rot) = getLocation()

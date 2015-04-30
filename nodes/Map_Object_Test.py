@@ -29,23 +29,28 @@ class TestOccupancyMapMethods(unittest.TestCase):
                            -1,  -1,  -1,  -1,  -1,  -1]
         self.map2 = OccupancyMap(testGrid2)
 
-    def testOutRangeHigh(self):
+    def testMap1OutRangeHigh(self):
         self.assertTrue(self.map1.isOutOfRange(7,7))
-        
-    def testOutRangeLow(self):
+
+    def testMap1OutRangeLow(self):
         self.assertTrue(self.map1.isOutOfRange(-1,-1))
 
-    def testCheckForValue(self):
+    def testMap1CheckForValue(self):
         self.assertTrue(self.map1.checkForValue(0, 0, -1))
         self.assertTrue(self.map1.checkForValue(5, 6, -1))
 
-    def testFindFrontier(self):
+    def testMap1FindFrontier(self):
         frontierCentroids = self.map1.findFrontiers()
         self.assertItemsEqual(frontierCentroids, [(1,3), (2,1), (3,4)])
         self.assertEqual(len(frontierCentroids), 3)
 
-    def testNonCentroid(self):
+    def testMap2NonCentroid(self):
         frontierCentroids = self.map2.findFrontiers()
+        '''
+         * Map2 should have only one fronteer because it eliminates the
+         * frontiers that are surrounded by unknown space or walls.
+         *
+        '''
         self.assertItemsEqual(frontierCentroids, [(3,1)])
         self.assertEqual(len(frontierCentroids), 1)
 

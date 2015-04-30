@@ -50,7 +50,7 @@ def main():
     rospy.sleep(3)
     mapSub = rospy.Subscriber(MAP_TOPIC, OccupancyGrid, map_callback)
     global frontierPub
-    frontierPub = rospy.Publisher(FRONTIER_PUB_TOPIC, GridCells, queue_size=10)
+    frontierPub = rospy.Publisher(FRONTIER_PUB_TOPIC, GridCells, queue_size=1)
     rospy.spin()
 
 

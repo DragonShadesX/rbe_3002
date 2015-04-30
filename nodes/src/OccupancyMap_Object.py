@@ -92,6 +92,8 @@ class OccupancyMap:
     ''' Checks to see if the given cell is on the fronteer'''
     def _isFrontier(self, x, y):
         #Checks above,
+        # if not self.checkForValue( x, y, 0, errorOutRange=True):
+        #     return False
         checkCells = self.getAdjacentCellsList(x, y, diagonal=False)
         for cell in checkCells:
             if self.checkForValue( cell[0], cell[1], -1):

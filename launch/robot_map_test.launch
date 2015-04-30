@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rbe_3002)/lab_4_live_robot_rviz_config.rviz" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rbe_3002)/lab_5_live_robot_rviz_config.rviz" />
   <!--node name="a_star_server" pkg="rbe_3002" type="a_star_server.py" respawn="false" output="screen"/-->
   <node name="map_obsticle_expander" pkg="rbe_3002" type="map_obsticle_expander.py" respawn="false"/>
   <node name="map_scaler" pkg="rbe_3002" type="map_scaler.py" respawn="false"/>

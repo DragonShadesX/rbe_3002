@@ -38,28 +38,36 @@ def generate_pose(x, y, theta):
     return stamped_pose
 
 def status_callback(ret):
-    ret = GoalStatusArray()
+    #ret = GoalStatusArray()
     if len(ret.status_list) > 0: # Prevents print spamming
-        print "Status callback"
-        print ret
+        #print "Status callback"
+        #print ret
         global status_list
         status_list = ret.status_list
 
 def getStatus(id):
     global status_list
     for element in status_list:
-        if element.goal_id.id == String(str(id)):
+        if element.goal_id.id is str(id):
             return element.status
     return -1
 
+def getHighestStatus():
+    global status_list
+    low = 0
+    for element in status_list:
+        if low < element.status:
+            low = element.status
+    return low
+
 
 def driveTo(x,y, theta):
-    print "drive to"
+    print "Drive to (%f, %f, %f)" % (x, y, theta)
     newPose = generate_pose(x, y, 0)
     #print newPose
     actionGoal = MoveBaseActionGoal()
     actionGoal.header = genHeader()
-    actionGoal.goal_id.id = String(str(driveTo.goalID))
+    actionGoal.goal_id.id = str(driveTo.goalID)
     actionGoal.goal_id.stamp = rospy.Time.now()
     goal = MoveBaseGoal()
     goal.target_pose = newPose
@@ -69,13 +77,18 @@ def driveTo(x,y, theta):
     global actionGoalPublisher
     actionGoalPublisher.publish(actionGoal)
 
-    delayRate = rospy.Rate(1)
     # Wait for the robot's status to to have reached the goal
+    timeOutCounter = 0
     while not rospy.is_shutdown(): # This is done so that status can be checked and used
-        delayRate.sleep()
+        rospy.sleep(4.)
+        timeOutCounter += 1
         currentStatus = getStatus(driveTo.goalID)
-        if currentStatus == GoalStatus.ABORTED:
+        global cant_reach_list
+        print "Status: %d, GoalID: %d, Driving to: (%f, %f, %f), # unreachable: %d" % (currentStatus, driveTo.goalID, x, y, theta, len(cant_reach_list  ))
+        if currentStatus == GoalStatus.ABORTED or timeOutCounter > 20:
             print "The goal was aborted"
+
+            cant_reach_list.append((x, y))
             break
         elif currentStatus == GoalStatus.REJECTED:
             print "The goal was rejected"
@@ -89,7 +102,7 @@ def driveTo(x,y, theta):
             print "Drive to complete!"
             break
     driveTo.goalID += 1
-driveTo.goalID = 0
+
 
 def distance(p0, p1):
     return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
@@ -102,22 +115,33 @@ def frontier_callback(ret):
 
     shortestDistance = None
     closestPoint = None
+    global cant_reach_list
     for cell in ret.cells:
-        cell = Point()
+        #cell = Point()
         point = (cell.x, cell.y)
         newDistance = distance(point, trans)
-        if shortestDistance == None or shortestDistance > newDistance :
+        # If this is a point we are unable to reach
+        if point in cant_reach_list:
+            continue
+        if (shortestDistance == None or shortestDistance > newDistance) and  abs(newDistance) > 2:
             shortestDistance = newDistance
             closestPoint = point
-    # Now set the closes goal
-    global closestGoal
-    closestGoal = closestPoint
+
+
+    if closestPoint == None:# If we were unable to find a point because all were unreachable
+        cant_reach_list = []
+        frontier_callback(ret)
+    else: # Now set the closes goal
+        global closestGoal
+        closestGoal = closestPoint
 
 def main():
     rospy.init_node(NAME)
     # Init Globals with their type
     global status_list
     status_list = []
+    global cant_reach_list
+    cant_reach_list = []
 
     global actionGoalPublisher
     init_point2pont()
@@ -126,12 +150,15 @@ def main():
     frontierSub = rospy.Subscriber('grid_frontier', GridCells, frontier_callback)
     rospy.wait_for_message('grid_frontier', GridCells)
 
-    global closestGoal
+    rospy.sleep(1)
+    driveTo.goalID = getHighestStatus()
 
-    while 1:
+    global closestGoal
+    while not rospy.is_shutdown():
+        rospy.sleep(3) #Allow the goal to be calculated
         closesGoalCopy = closestGoal
-        driveTo(closesGoalCopy[0], closesGoalCopy[1], 0)
-        rospy.sleep(1)
+        (trans, rot) = getLocation()
+        driveTo(closesGoalCopy[0], closesGoalCopy[1], rot[2])
 
     rospy.spin()
 

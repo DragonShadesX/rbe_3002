@@ -4,23 +4,9 @@
 class OccupancyMap:
     ''' Defines a collection of frontier cells that form one frontier '''
     class Frontier_Collection(object):
-        #Static list of these objects
-        list = []
-        @staticmethod
-        def getFrontierCenters():
-            centers = []
-            for frontier in OccupancyMap.Frontier_Collection.list:
-                #print "Frontier"
-                #print frontier.elements
-                x = [p[0] for p in frontier.elements]
-                y = [p[1] for p in frontier.elements]
-                centroid = (sum(x) / len(frontier.elements), sum(y) / len(frontier.elements))
-                centers.append(centroid)
-            return centers
-
 
         def __init__(self, x, y, map_instance):
-            OccupancyMap.Frontier_Collection.list.append(self)
+            map_instance.frontierList.append(self)
             self.map_instance = map_instance
             self.elements = [(x, y)]
 
@@ -35,14 +21,14 @@ class OccupancyMap:
             if isinstance(aCollection, OccupancyMap.Frontier_Collection):
 
                 if self is aCollection:
-                    # I don't know if this is possible but it is theoreticalls
+                    # I don't know if this is possible but it is theoretically is
                     raise ValueError("Trying to merge self with self")
 
                 for element in aCollection.elements:
                     self.add(element[0], element[1])
                     self.map_instance.data[element[0]][element[1]] = self
                 #Remove this collection from the master list because it has been merged
-                OccupancyMap.Frontier_Collection.list.remove(aCollection)
+                self.map_instance.frontierList.remove(aCollection)
                 # This should be the last time that we use this collection
                 # If we use it again then there is a problem somewhere
                 del aCollection
@@ -56,6 +42,18 @@ class OccupancyMap:
         data = mapData.data
         #self.data = [list(data[x:x+self.width]) for x in xrange(0, len(data), self.width)]
         self.data = [list(data[x::self.width]) for x in range( self.width)]
+        self.frontierList = []
+
+    def _getFrontierCenters(self):
+        centers = []
+        for frontier in self.frontierList:
+            #print "Frontier"
+            #print frontier.elements
+            x = [p[0] for p in frontier.elements]
+            y = [p[1] for p in frontier.elements]
+            centroid = (sum(x) / len(frontier.elements), sum(y) / len(frontier.elements))
+            centers.append(centroid)
+        return centers
 
     def isOutOfRange(self, x, y):
         return (x < 0 or x >= self.width) or (y < 0 or y >= self.height)
@@ -92,12 +90,25 @@ class OccupancyMap:
     ''' Checks to see if the given cell is on the fronteer'''
     def _isFrontier(self, x, y):
         #Checks above,
-        # if not self.checkForValue( x, y, 0, errorOutRange=True):
-        #     return False
+        if not self.checkForValue( x, y, 0, errorOutRange=True):
+            return False
         checkCells = self.getAdjacentCellsList(x, y, diagonal=False)
+        checkFrontierCount = 0
+        checkWallCount = 0
+        checkCellTotal = len(checkCells)
         for cell in checkCells:
             if self.checkForValue( cell[0], cell[1], -1):
-                return True
+                checkFrontierCount += 1
+            if self.checkForValue( cell[0], cell[1], 100):
+                checkWallCount += 1
+
+        # Simple check to make sure that this logic never breaks
+        assert (checkFrontierCount + checkWallCount) <= checkCellTotal
+
+        # If this cell doesn't have another "known" cell next to it then assume that this is not a frontier
+        # If there is at least one unknown cell in range then we have found an edge
+        if (checkFrontierCount + checkWallCount) != checkCellTotal and checkFrontierCount > 0:
+            return True
         return False
 
     ''' Checks if this cell is adjacent to another frontier'''
@@ -141,4 +152,8 @@ class OccupancyMap:
 
                         #Set this cell to thisFrontier
                         self.data[x][y] = thisFrontier
-        return OccupancyMap.Frontier_Collection.getFrontierCenters()
+                    #Endif
+                #Endif
+            #Endfor
+        #Endfor
+        return self._getFrontierCenters()

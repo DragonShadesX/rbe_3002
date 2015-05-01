@@ -13,15 +13,21 @@ def init_point2pont():
     listener = tf.TransformListener()
 
 
-def getLocation():
-    rate = rospy.Rate(2.0)
+def getLocation(timeout=20):
+    rate = rospy.Rate(10)
+    startTime = rospy.get_rostime().secs
     while not rospy.is_shutdown():
+        if startTime + timeout < rospy.get_rostime().secs and getLocation.lastLocation != None:
+            rospy.logwarn("Getting transformation timed out. Returing last location")
+            return getLocation.lastLocation
         try:
-            return listener.lookupTransform('map', 'base_footprint', rospy.Time(0))
+            getLocation.lastLocation = listener.lookupTransform('map', 'base_footprint', rospy.Time(0))
+            return getLocation.lastLocation
             break
         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
             continue
         rate.sleep()
+getLocation.lastLocation = None
 
 # move from current position to goal x, y:
 # curT must be with respect to the world with zero along the positive x axis

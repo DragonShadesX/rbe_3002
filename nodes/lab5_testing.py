@@ -111,29 +111,37 @@ def frontier_callback(ret):
     rospy.loginfo("frontier_callback")
     print ret
     #ret = GridCells() #Used for autocompletion
-    (trans, rot) = getLocation()
+    global frontierList
+    frontierList = ret.cells
 
+
+def getClosestGoal(minDistance):
+    global frontierList
+    (trans, rot) = getLocation()
     shortestDistance = None
     closestPoint = None
     global cant_reach_list
-    for cell in ret.cells:
+    for cell in frontierList:
         #cell = Point()
-        point = (cell.x, cell.y)
+        point = (cell.x, cell.y, rot[2])
         newDistance = distance(point, trans)
         # If this is a point we are unable to reach
         if point in cant_reach_list:
             continue
-        if (shortestDistance == None or shortestDistance > newDistance) and  abs(newDistance) > 2:
+        if (shortestDistance == None or shortestDistance > newDistance) and  abs(newDistance) > minDistance:
             shortestDistance = newDistance
             closestPoint = point
 
 
-    if closestPoint == None:# If we were unable to find a point because all were unreachable
-        cant_reach_list = []
-        frontier_callback(ret)
+    if closestPoint == None and minDistance != 0:# If we were unable to find a point because all were unreachable
+        #cant_reach_list = []
+        return getClosestGoal(0)
+    elif minDistance == 0:
+        print "WE ARE DONE?"
+        exit(0)
     else: # Now set the closes goal
-        global closestGoal
-        closestGoal = closestPoint
+
+        return closestPoint
 
 def main():
     rospy.init_node(NAME)
@@ -155,10 +163,12 @@ def main():
 
     global closestGoal
     while not rospy.is_shutdown():
-        rospy.sleep(3) #Allow the goal to be calculated
-        closesGoalCopy = closestGoal
-        (trans, rot) = getLocation()
-        driveTo(closesGoalCopy[0], closesGoalCopy[1], rot[2])
+        rospy.loginfo("Waiting for a little while")
+        rospy.sleep(2) #Allow the goal to be calculated
+        rospy.loginfo("Getting the closest goal")
+        closesGoalCopy = getClosestGoal(2)
+        rospy.loginfo("Getting the current location")
+        driveTo(closesGoalCopy[0], closesGoalCopy[1], closesGoalCopy[2])
 
     rospy.spin()
 

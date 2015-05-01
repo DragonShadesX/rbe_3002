@@ -10,6 +10,7 @@ from src.occupancy_grid_manipulator import *
 
 #Scales the map data from map topic
 def compress_map(mapData, division):
+    rospy.loginfo("Compressing map by div %d", division)
     division = int(division)
     newGrid = OccupancyGrid()
     width = mapData.info.width
@@ -37,7 +38,7 @@ def compress_map(mapData, division):
                         indexy = int(division*y)+divy
                         value = dataChunked[indexx] [indexy]
                     except:
-                        print 'x: %d divx: %d indexx: %d y: %d divy: %d indexy: %d' % (x, divx, indexx, y, divy, indexy)
+                        rospy.logfatal('x: %d divx: %d indexx: %d y: %d divy: %d indexy: %d', x, divx, indexx, y, divy, indexy)
                         raise
                     if value == 100:
                         wallFound = True

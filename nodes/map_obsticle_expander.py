@@ -15,7 +15,7 @@ def expand_arround_cordinate(data, x, y, width, height, expandBy):
         return None
     if expandBy < 0:
         print expandBy
-        print "Error, Expand by below zero"
+        rospy.logfatal("Error, Expand by below zero")
         exit()
     expandBy  -= 1
     expand_cordinate(data, x-1, y, width, height, expandBy)
@@ -47,20 +47,20 @@ def expand_obsticle_map(mapData, expansionSize):
     num_cubes_expand_by = int(math.ceil(float(expansionSize)/resolution))
     print num_cubes_expand_by
 
-    print "Expanding"
+    rospy.loginfo("Expanding")
     for x in xrange(height): #All of the height elements
         for y in xrange(width): #All of the width elements
             #print "x: %d, y: %d" % (x, y)
             if dataChunked[x][y] == 100:
-                print "Expanding arround %d %d" % (x, y)
+                #print "Expanding arround %d %d" % (x, y)
                 expand_arround_cordinate(dataChunked, x, y, width, height, num_cubes_expand_by)
                 #exit()
-    print "Expansion Complete"
+    rospy.loginfo("Expansion Complete")
     for x in xrange(height): #All of the height elements
         for y in xrange(width): #All of the width elements
             cellData = dataChunked[x][y]
             newGrid.data.append(100 if cellData > 0 else cellData)
-    print "New Data Generation Complete"
+    rospy.loginfo("New Data Generation Complete")
 
     return newGrid
 

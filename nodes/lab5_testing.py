@@ -8,6 +8,7 @@ from tf.transformations import quaternion_from_euler
 from std_msgs.msg import Header
 from src.point2point_move_function import *
 from std_msgs.msg import String
+from sound_play.libsoundplay import SoundClient
 import rospy, math
 
 NAME = 'lab5_testing'
@@ -76,6 +77,7 @@ def driveTo(x,y, theta):
     # Publish the goal to the robot
     global actionGoalPublisher
     actionGoalPublisher.publish(actionGoal)
+    global soundClient
 
     # Wait for the robot's status to to have reached the goal
     timeOutCounter = 0
@@ -86,19 +88,23 @@ def driveTo(x,y, theta):
         global cant_reach_list
         print "Status: %d, GoalID: %d, Driving to: (%f, %f, %f), # unreachable: %d" % (currentStatus, driveTo.goalID, x, y, theta, len(cant_reach_list  ))
         if currentStatus == GoalStatus.ABORTED or timeOutCounter > 20:
+            soundClient.say("Abort driving to goal.")
             print "The goal was aborted"
 
             cant_reach_list.append((x, y))
             break
         elif currentStatus == GoalStatus.REJECTED:
+            soundClient.say("Goal rejected")
             print "The goal was rejected"
             break
         elif currentStatus == GoalStatus.LOST:
+            soundClient.say("Robot is lost")
             print "The robot is lost, exiting driving"
             #TODO Should we send a cancel message?
             exit(1)
             break
         elif currentStatus == GoalStatus.SUCCEEDED:
+            soundClient.say("Goal reached. Moving on.")
             print "Drive to complete!"
             break
     driveTo.goalID += 1
@@ -121,6 +127,7 @@ def getClosestGoal(minDistance):
     shortestDistance = None
     closestPoint = None
     global cant_reach_list
+    global soundClient
     for cell in frontierList:
         #cell = Point()
         point = (cell.x, cell.y, rot[2])
@@ -137,6 +144,7 @@ def getClosestGoal(minDistance):
         #cant_reach_list = []
         return getClosestGoal(0)
     elif minDistance == 0:
+        soundClient.say("Navigation Complete")
         print "WE ARE DONE?"
         exit(0)
     else: # Now set the closes goal
@@ -152,6 +160,11 @@ def main():
     cant_reach_list = []
 
     global actionGoalPublisher
+
+    # Speech stuff
+    global soundClient
+    soundClient = SoundClient()
+
     init_point2pont()
     actionStatus = rospy.Subscriber('move_base/status', GoalStatusArray, status_callback)
     actionGoalPublisher = rospy.Publisher('move_base/goal', MoveBaseActionGoal, queue_size=10)
@@ -161,6 +174,7 @@ def main():
     rospy.sleep(1)
     driveTo.goalID = getHighestStatus()
 
+    soundClient.say("Starting Driving")
     global closestGoal
     while not rospy.is_shutdown():
         rospy.loginfo("Waiting for a little while")

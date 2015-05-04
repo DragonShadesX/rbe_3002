@@ -30,7 +30,7 @@ def compress_map(mapData, division):
     for x in xrange(int(height/(division))): #All of the height elements
         for y in xrange(int(width/(division))): #All of the width elements
             wallFound = False
-            nullSpaceFound = True
+            nullSpaceFound = False
             for divx in xrange(division):
                 for divy in xrange(division):
                     try:
@@ -42,13 +42,13 @@ def compress_map(mapData, division):
                         raise
                     if value == 100:
                         wallFound = True
-                    elif value == 0:
-                        nullSpaceFound = False
-            if wallFound:
+                    elif value == -1:
+                        nullSpaceFound = True
+            if wallFound: # If any walls were found then make this a wall
                 newGrid.data.append(100)
-            elif nullSpaceFound:
+            elif nullSpaceFound: # If any unknown space is found then make the whole cell unknown
                 newGrid.data.append(-1)
-            else:
+            else: # We know what is here
                 newGrid.data.append(0)
     #print newGrid
     return newGrid

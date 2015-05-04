@@ -41,7 +41,8 @@ class TestOccupancyMapMethods(unittest.TestCase):
 
     def testMap1FindFrontier(self):
         frontierCentroids = self.map1.findFrontiers()
-        self.assertItemsEqual(frontierCentroids, [(1,3), (2,1), (3,4)])
+        #print frontierCentroids
+        self.assertItemsEqual(frontierCentroids, [(1,3), (2,1), (4,5)])
         self.assertEqual(len(frontierCentroids), 3)
 
     def testMap2NonCentroid(self):

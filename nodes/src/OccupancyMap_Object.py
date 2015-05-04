@@ -11,7 +11,33 @@ class OccupancyMap(object):
             self.elements = [(x, y)]
 
         def add(self, x, y):
-            self.elements.append((x,y))
+            if len(self.elements) == 1: # If the lenght is 1 then we should be put as the next element in the list
+                self.elements.append((x,y))
+                return
+            adjacents = self.map_instance.getAdjacentCellsList(x, y, diagonal=False)
+            index = None
+            for adjacent in adjacents:
+                try:
+                    index = self.elements.index(adjacent)
+                    break
+                except ValueError:
+                    continue
+            if index == None:
+                adjacents = self.map_instance.getAdjacentCellsList(x, y)
+                for adjacent in adjacents:
+                    try:
+                        index = self.elements.index(adjacent)
+                        break
+                    except ValueError:
+                        continue
+            #print "Index"
+            #print index
+            if index == 0:
+                self.elements.insert(0, (x,y))
+            elif index == None:
+                raise ValueError("Can not add this value. Not adjacent to fontier")
+            else:
+                self.elements.append((x,y))
 
         '''
             Merges two Frontier_Collections together.
@@ -23,8 +49,14 @@ class OccupancyMap(object):
                 if self is aCollection:
                     # I don't know if this is possible but it is theoretically is
                     raise ValueError("Trying to merge self with self")
-
+                notAdded = []
                 for element in aCollection.elements:
+                    try:
+                        self.add(element[0], element[1])
+                    except ValueError:
+                        notAdded.append((element[0], element[1]))
+                    self.map_instance.data[element[0]][element[1]] = self
+                for element in notAdded:
                     self.add(element[0], element[1])
                     self.map_instance.data[element[0]][element[1]] = self
                 #Remove this collection from the master list because it has been merged
@@ -45,14 +77,22 @@ class OccupancyMap(object):
         self.frontierList = []
 
     def _getFrontierCenters(self):
+        #print "Frontier"
         centers = []
         for frontier in self.frontierList:
-            #print "Frontier"
+            # #print "Frontier"
+            # #print frontier.elements
+            # x = [p[0] for p in frontier.elements]
+            # y = [p[1] for p in frontier.elements]
+            # index = None
+            # if len(frontier.elements) % 0 != 0:
+            #     index = (len(frontier.elements)-1)/2
+            # else:
             #print frontier.elements
-            x = [p[0] for p in frontier.elements]
-            y = [p[1] for p in frontier.elements]
-            centroid = (sum(x) / len(frontier.elements), sum(y) / len(frontier.elements))
+
+            centroid = frontier.elements[(len(frontier.elements)-1)/2]
             centers.append(centroid)
+        #print "Done"
         return centers
 
     def isOutOfRange(self, x, y):
@@ -114,7 +154,7 @@ class OccupancyMap(object):
     ''' Checks if this cell is adjacent to another frontier'''
     def _getAdjacentFrontier(self, x, y):
         # List of cells to check for adjacent fronteer
-        checkCells = self.getAdjacentCellsList(x, y)
+        checkCells = self.getAdjacentCellsList(x, y, diagonal=False)
         adjacentFrontiers = []
         for cell in checkCells:
             if self.checkForValue( cell[0], cell[1], lambda x : (isinstance(x, OccupancyMap.Frontier_Collection) and x not in adjacentFrontiers)):
@@ -134,15 +174,25 @@ class OccupancyMap(object):
                         adjacents = self._getAdjacentFrontier(x,y)
                         thisFrontier = None
                         if len(adjacents) > 0:
+                            # Regardless the length of the list we need to add this cell to the first frontier
+                            added = False
+                            try:
+                                adjacents[0].add(x,y)
+                                added = True
+                            except ValueError:
+                                pass
+
                             # The list returned is greater than 0 then we are not alone
-                            if len(adjacents) >= 2:
+                            if len(adjacents) == 2:
                                 # Since there is 2 or more frontiers next to us we have to do a multi merge
                                 # This should be very rare
                                 for i in xrange(len(adjacents)-1):
                                     adjacents[0].merge(adjacents[i+1])
+                            elif len(adjacents) > 2:
+                                raise "3 Adjacent Frontier"
+                            if not added:
+                                adjacents[0].add(x,y)
 
-                            # Regardless the length of the list we need to add this cell to the first frontier
-                            adjacents[0].add(x,y)
                             thisFrontier = adjacents[0]
 
                         else:

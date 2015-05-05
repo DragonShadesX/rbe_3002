@@ -10,13 +10,9 @@ On Robot: `roslaunch turtlebot_bringup minimal.launch` and `roslaunch turtlebot_
 Launch list (each in different terminal) `roscore`, `rosrun rviz rviz -d {config file}`, `rosrun rbe_3002 map_scaler.py`, `rosrun rbe_3002 map_obsticle_expander.py`, `rosrun rbe_3002 a_star_server.py`, `rosrun map_server map_server {map file}`, `rosrun rbe_3002 lab4.py`
 Every time you want to change a_star_server code you only need to re-run the a_star server and the map_server (in that order). The map transformer nodes will only run if the map_server rebroadcasts a message.
 
-### Partial Launch (Not tested on current version)
-Launching the AStar service is currently done through using `roslaunch rbe_3002 minimal.launch`.
+### Full Launch 
+In order to run the full lab run `roslaunch rbe_3002 final_project.launch` This will launch `rviz` as well as our example script. The example script is on a 15 second delay to allow `rviz` to load fully before messages are sent.  On the turtlebot, two terminals are needed.  In the first type `roslaunch turtlebot_bringup minimal.launch`, then launch the final project code, and then on the second terminal on the turtlebot type `roslaunch turtlebot_navigation gmapping_demo.launch`
 
-I would recommend leaving the `minimal.launch` file as the basic launch for our package and adding additional launch files to test its integration with other packages.
-
-### Full Launch (Not tested on current version)
-In order to run the full lab run `roslaunch rbe_3002 full.launch` This will launch `rviz` as well as our example script. The example script is on a 15 second delay to allow `rviz` to load fully before messages are sent.
 
 ## Clone Location
 This project should be cloned into `catkin_wc/src/` so the directory should look like `catkin_wc/src/rbe_3002` afterward.

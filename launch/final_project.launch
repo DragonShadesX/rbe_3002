@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rbe_3002)/lab_5_live_robot_rviz_config.rviz" />
+  <node name="soundplay_node" pkg="sound_play" type="soundplay_node.py" respawn="true"/>
+  <node name="map_obsticle_expander" pkg="rbe_3002" type="map_obsticle_expander.py" respawn="true"/>
+  <node name="map_scaler" pkg="rbe_3002" type="map_scaler.py" respawn="true"/>
+  <node name="map_frontier" pkg="rbe_3002" type="map_frontier_server.py" output="screen" respawn="true"/>
+  <node name="robot_control" pkg="rbe_3002" type="robot_control.py" output="screen" respawn="true"/>
+</launch>

@@ -11,7 +11,8 @@ from std_msgs.msg import String
 from sound_play.libsoundplay import SoundClient
 import rospy, math
 
-NAME = 'lab5_testing'
+''' This node is used to control the robots driving'''
+NAME = 'robot_control'
 
 def genHeader():
     header = Header()
@@ -143,12 +144,11 @@ def getClosestGoal(minDistance):
     if closestPoint == None and minDistance != 0:# If we were unable to find a point because all were unreachable
         #cant_reach_list = []
         return getClosestGoal(0)
-    elif minDistance == 0:
-        soundClient.say("Navigation Complete")
+    elif closestPoint == None and minDistance == 0:
+        soundClient.say("Navigation complete! Thank you, now, can we please have summer start, finally!")
         print "WE ARE DONE?"
         exit(0)
     else: # Now set the closes goal
-
         return closestPoint
 
 def main():
